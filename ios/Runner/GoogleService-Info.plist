@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>486952219183-97jvo3a345pk71n4c1tsp74ps835oamr.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.486952219183-97jvo3a345pk71n4c1tsp74ps835oamr</string>
+	<key>API_KEY</key>
+	<string>AIzaSyA1piZiiQFaaoIg_ikgXNWNHwFkhMuoqfo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>486952219183</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>io.moresushant48.clippad</string>
+	<key>PROJECT_ID</key>
+	<string>clippad</string>
+	<key>STORAGE_BUCKET</key>
+	<string>clippad.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:486952219183:ios:8d7069b30fe094a8584cda</string>
+	<key>DATABASE_URL</key>
+	<string>https://clippad-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
