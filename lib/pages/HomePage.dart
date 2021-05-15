@@ -1,5 +1,8 @@
+import 'package:clippad/services/FirestoreService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:clipboard_monitor/clipboard_monitor.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -7,6 +10,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  TextEditingController _data = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    ClipboardMonitor.registerCallback(onClipboardText);
+  }
+
+  void onClipboardText(String text) {
+    setState(() {
+      _data.text = text;
+    });
+    print("clipboard changed: $text");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +39,23 @@ class _HomePageState extends State<HomePage> {
               if (snapshot.connectionState == ConnectionState.done) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Card(child: TextField()),
+                  child: Card(
+                      child: Column(
+                    children: [
+                      TextField(
+                        controller: _data,
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            Clipboard.getData(Clipboard.kTextPlain)
+                                .then((clipData) {
+                              _data.text = clipData.text;
+                              fireStoreService.updateData(clipData.text);
+                            });
+                          },
+                          child: Text("Clip")),
+                    ],
+                  )),
                 );
               } else
                 return Center(
@@ -35,5 +69,11 @@ class _HomePageState extends State<HomePage> {
             }),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    ClipboardMonitor.unregisterCallback(onClipboardText);
+    super.dispose();
   }
 }

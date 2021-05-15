@@ -20,7 +20,7 @@ class GoogleAuthService {
   }
 
   Future<GoogleSignInAccount> getLoggedUser() async {
-    return _googleSignIn.currentUser;
+    return _googleSignIn.signInSilently();
   }
 }
 
