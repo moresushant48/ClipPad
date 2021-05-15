@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:clippad/services/FirestoreService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
+import 'package:clippad/services/SharedPrefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
@@ -10,6 +13,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  IconData fabIcon = Icons.play_arrow_sharp;
+  bool isEnabled;
   TextEditingController _data = TextEditingController();
 
   @override
@@ -24,6 +29,42 @@ class _HomePageState extends State<HomePage> {
     });
     fireStoreService.updateData(text);
     print("clipboard changed: $text");
+  }
+
+  void serviceHandler() async {
+    print("Inside Handler");
+    prefService
+        .getSharedBool(PrefService.IS_SERVICE_ON)
+        .then((isServiceOn) async {
+      print("Printing isServiceOn : " + isServiceOn.toString());
+      if (isServiceOn) {
+        stopServiceInPlatform();
+      } else {
+        startServiceInPlatform();
+      }
+    });
+  }
+
+  void startServiceInPlatform() async {
+    if (Platform.isAndroid) {
+      var methodChannel = MethodChannel("io.moresushant48.clippad");
+      String data = await methodChannel.invokeMethod("startService");
+      debugPrint(data);
+      prefService.putSharedBool(PrefService.IS_SERVICE_ON, true);
+      fabIcon = Icons.pause_sharp;
+      setState(() {});
+    }
+  }
+
+  void stopServiceInPlatform() async {
+    if (Platform.isAndroid) {
+      var methodChannel = MethodChannel("io.moresushant48.clippad");
+      String data = await methodChannel.invokeMethod("stopService");
+      debugPrint(data);
+      prefService.putSharedBool(PrefService.IS_SERVICE_ON, false);
+      fabIcon = Icons.play_arrow_sharp;
+      setState(() {});
+    }
   }
 
   @override
@@ -60,6 +101,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
             }),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => serviceHandler(),
+        child: Icon(fabIcon),
       ),
     );
   }
