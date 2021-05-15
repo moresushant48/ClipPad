@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _data.text = text;
     });
+    fireStoreService.updateData(text);
     print("clipboard changed: $text");
   }
 
@@ -40,22 +41,14 @@ class _HomePageState extends State<HomePage> {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
-                      child: Column(
-                    children: [
-                      TextField(
-                        controller: _data,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            Clipboard.getData(Clipboard.kTextPlain)
-                                .then((clipData) {
-                              _data.text = clipData.text;
-                              fireStoreService.updateData(clipData.text);
-                            });
-                          },
-                          child: Text("Clip")),
-                    ],
-                  )),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _data,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               } else
                 return Center(
