@@ -6,6 +6,9 @@ import 'package:clippad/services/SharedPrefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:clipboard_monitor/clipboard_monitor.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:one_context/one_context.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,17 +18,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   IconData fabIcon = Icons.play_arrow_sharp;
   bool isEnabled;
-  TextEditingController _data = TextEditingController();
+  String _data = "";
 
   @override
   void initState() {
     super.initState();
-    ClipboardMonitor.registerCallback(onClipboardText);
+    initialData();
+  }
+
+  initialData() {
+    Clipboard.getData(Clipboard.kTextPlain).then((value) {
+      setState(() {
+        _data = value.text;
+      });
+    });
   }
 
   void onClipboardText(String text) {
     setState(() {
-      _data.text = text;
+      _data = text;
     });
     fireStoreService.updateData(text);
     print("clipboard changed: $text");
@@ -52,6 +63,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint(data);
       prefService.putSharedBool(PrefService.IS_SERVICE_ON, true);
       fabIcon = Icons.pause_sharp;
+      ClipboardMonitor.registerCallback(onClipboardText);
       setState(() {});
     }
   }
@@ -63,6 +75,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint(data);
       prefService.putSharedBool(PrefService.IS_SERVICE_ON, false);
       fabIcon = Icons.play_arrow_sharp;
+      ClipboardMonitor.unregisterCallback(onClipboardText);
       setState(() {});
     }
   }
@@ -74,34 +87,44 @@ class _HomePageState extends State<HomePage> {
         title: Text("ClipPad"),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: FutureBuilder(
-            future: googleAuthService.isLoggedIn(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _data,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } else
-                return Center(
+      body: FutureBuilder(
+          future: googleAuthService.isLoggedIn(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: OneContext().mediaQuery.size.width,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text("App dosen't work without Signing In."),
-                      TextButton(onPressed: () {}, child: Text("Sign In"))
+                      Text("Last Copied"),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Linkify(
+                            text: _data,
+                            onOpen: _onOpen,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                );
-            }),
-      ),
+                ),
+              );
+            } else
+              return Center(
+                child: Column(
+                  children: [
+                    Text("App dosen't work without Signing In."),
+                    TextButton(onPressed: () {}, child: Text("Sign In"))
+                  ],
+                ),
+              );
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => serviceHandler(),
         child: Icon(fabIcon),
@@ -109,9 +132,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      OneContext.instance.showSnackBar(
+          builder: (_) => SnackBar(content: Text("Trying to open website.")));
+      await launch(link.url);
+    } else {
+      OneContext.instance.showSnackBar(
+          builder: (_) => SnackBar(content: Text("Couldn't open website.")));
+    }
+  }
+
   @override
   void dispose() {
-    ClipboardMonitor.unregisterCallback(onClipboardText);
     super.dispose();
   }
 }
