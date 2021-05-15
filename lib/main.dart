@@ -1,6 +1,5 @@
 import 'package:clippad/pages/HomePage.dart';
 import 'package:clippad/services/GoogleAuth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:one_context/one_context.dart';
 import 'package:theme_provider/theme_provider.dart';
