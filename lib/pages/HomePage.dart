@@ -1,11 +1,8 @@
-import 'dart:io';
-
-import 'package:clippad/services/FirestoreService.dart';
+import 'package:clippad/services/ClipboardService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:clippad/services/SharedPrefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:clipboard_monitor/clipboard_monitor.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:one_context/one_context.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -34,50 +31,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void onClipboardText(String text) {
-    setState(() {
-      _data = text;
-    });
-    fireStoreService.updateData(text);
-    print("clipboard changed: $text");
-  }
-
   void serviceHandler() async {
-    print("Inside Handler");
     prefService
         .getSharedBool(PrefService.IS_SERVICE_ON)
         .then((isServiceOn) async {
-      print("Printing isServiceOn : " + isServiceOn.toString());
       if (isServiceOn) {
-        stopServiceInPlatform();
+        fabIcon = Icons.play_arrow_sharp;
+        clipService.stopServiceInPlatform();
+        setState(() {});
       } else {
-        startServiceInPlatform();
+        fabIcon = Icons.pause_sharp;
+        clipService.startServiceInPlatform();
+        setState(() {});
       }
     });
-  }
-
-  void startServiceInPlatform() async {
-    if (Platform.isAndroid) {
-      var methodChannel = MethodChannel("io.moresushant48.clippad");
-      String data = await methodChannel.invokeMethod("startService");
-      debugPrint(data);
-      prefService.putSharedBool(PrefService.IS_SERVICE_ON, true);
-      fabIcon = Icons.pause_sharp;
-      ClipboardMonitor.registerCallback(onClipboardText);
-      setState(() {});
-    }
-  }
-
-  void stopServiceInPlatform() async {
-    if (Platform.isAndroid) {
-      var methodChannel = MethodChannel("io.moresushant48.clippad");
-      String data = await methodChannel.invokeMethod("stopService");
-      debugPrint(data);
-      prefService.putSharedBool(PrefService.IS_SERVICE_ON, false);
-      fabIcon = Icons.play_arrow_sharp;
-      ClipboardMonitor.unregisterCallback(onClipboardText);
-      setState(() {});
-    }
   }
 
   @override
@@ -128,6 +95,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => serviceHandler(),
         child: Icon(fabIcon),
+        mini: true,
       ),
     );
   }
@@ -135,11 +103,15 @@ class _HomePageState extends State<HomePage> {
   Future<void> _onOpen(LinkableElement link) async {
     if (await canLaunch(link.url)) {
       OneContext.instance.showSnackBar(
-          builder: (_) => SnackBar(content: Text("Trying to open website.")));
+          builder: (_) => SnackBar(
+              duration: Duration(milliseconds: 800),
+              content: Text("Trying to open website.")));
       await launch(link.url);
     } else {
       OneContext.instance.showSnackBar(
-          builder: (_) => SnackBar(content: Text("Couldn't open website.")));
+          builder: (_) => SnackBar(
+              duration: Duration(milliseconds: 800),
+              content: Text("Couldn't open website.")));
     }
   }
 
