@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:clippad/model/User.dart';
 import 'package:clippad/services/ClipboardService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:clippad/services/SharedPrefs.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -15,20 +19,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   IconData fabIcon = Icons.play_arrow_sharp;
   bool isEnabled;
-  String _data = "";
 
   @override
   void initState() {
     super.initState();
-    initialData();
-  }
-
-  initialData() {
-    Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      setState(() {
-        _data = value.text;
-      });
-    });
   }
 
   void serviceHandler() async {
@@ -55,7 +49,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-          future: googleAuthService.isLoggedIn(),
+          future: googleAuthService.getLoggedUser(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return Padding(
@@ -70,11 +64,24 @@ class _HomePageState extends State<HomePage> {
                       Card(
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
-                          child: Linkify(
-                            text: _data,
-                            onOpen: _onOpen,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18.0),
+                          child: StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(snapshot.data.id)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                User user = User.fromJson(
+                                    jsonEncode(snapshot.data.data()));
+                                return Linkify(
+                                  text: user.data,
+                                  onOpen: _onOpen,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 18.0),
+                                );
+                              } else
+                                return Container();
+                            },
                           ),
                         ),
                       ),

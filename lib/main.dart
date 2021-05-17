@@ -18,7 +18,6 @@ class _InitState extends State<Init> {
   @override
   void initState() {
     super.initState();
-    Firebase.initializeApp();
     googleAuthService
         .isLoggedIn()
         .then((value) => value ? null : googleAuthService.handleSignIn());
@@ -26,19 +25,30 @@ class _InitState extends State<Init> {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeProvider(
-      saveThemesOnChange: true,
-      loadThemeOnInit: true,
-      child: ThemeConsumer(
-        child: Builder(
-          builder: (themeContext) => MaterialApp(
-            builder: OneContext().builder,
-            navigatorKey: OneContext().key,
-            theme: ThemeProvider.themeOf(themeContext).data,
-            home: HomePage(),
-          ),
-        ),
-      ),
+    return FutureBuilder(
+      future: Firebase.initializeApp(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return ThemeProvider(
+            saveThemesOnChange: true,
+            loadThemeOnInit: true,
+            child: ThemeConsumer(
+              child: Builder(
+                builder: (themeContext) => MaterialApp(
+                  builder: OneContext().builder,
+                  navigatorKey: OneContext().key,
+                  theme: ThemeProvider.themeOf(themeContext).data,
+                  home: HomePage(),
+                ),
+              ),
+            ),
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 }

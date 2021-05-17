@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class User {
   String uid;
   String data;
@@ -11,6 +13,11 @@ class User {
   get getData => this.data;
 
   set setData(data) => this.data = data;
+
+  factory User.fromJson(dynamic json) {
+    dynamic jsonString = jsonDecode(json);
+    return User(jsonString['uid'], jsonString['data']);
+  }
 
   Map<String, dynamic> toJson() => {
         'uid': this.uid,
