@@ -22,6 +22,10 @@ class GoogleAuthService {
   Future<GoogleSignInAccount> getLoggedUser() async {
     return _googleSignIn.signInSilently();
   }
+
+  Future<void> logout() async {
+    return _googleSignIn.signOut();
+  }
 }
 
 final googleAuthService = GoogleAuthService();

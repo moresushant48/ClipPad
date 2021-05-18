@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:clippad/model/User.dart';
+import 'package:clippad/pages/MainAppBar.dart';
 import 'package:clippad/services/ClipboardService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:clippad/services/SharedPrefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:one_context/one_context.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -44,61 +44,70 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("ClipPad"),
-        centerTitle: true,
-      ),
-      body: FutureBuilder(
-          future: googleAuthService.getLoggedUser(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: OneContext().mediaQuery.size.width,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("Last Copied"),
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(snapshot.data.id)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                User user = User.fromJson(
-                                    jsonEncode(snapshot.data.data()));
-                                return Linkify(
-                                  text: user.data,
-                                  onOpen: _onOpen,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 18.0),
-                                );
-                              } else
-                                return Container();
-                            },
+      appBar: mainAppBar(context, "Clippad", setState),
+      body: Container(
+        width: OneContext.instance.mediaQuery.size.width,
+        child: FutureBuilder(
+            future: googleAuthService.getLoggedUser(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.data != null) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: OneContext().mediaQuery.size.width,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text("Last Copied"),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: StreamBuilder(
+                                stream: FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(snapshot.data.id)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    User user = User.fromJson(
+                                        jsonEncode(snapshot.data.data()));
+                                    return Linkify(
+                                      text: user.data,
+                                      onOpen: _onOpen,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 18.0),
+                                    );
+                                  } else
+                                    return Container();
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
+                    ),
+                  );
+                } else
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("App dosen't work without Signing In."),
+                      TextButton(
+                          onPressed: () =>
+                              googleAuthService.handleSignIn().then((value) {
+                                setState(() {});
+                              }),
+                          child: Text("Sign In"))
                     ],
-                  ),
-                ),
-              );
-            } else
-              return Center(
-                child: Column(
-                  children: [
-                    Text("App dosen't work without Signing In."),
-                    TextButton(onPressed: () {}, child: Text("Sign In"))
-                  ],
-                ),
-              );
-          }),
+                  );
+              } else
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => serviceHandler(),
         child: Icon(fabIcon),

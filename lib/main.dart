@@ -1,3 +1,4 @@
+import 'package:clippad/Routes.dart';
 import 'package:clippad/pages/HomePage.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,8 @@ class _InitState extends State<Init> {
                   navigatorKey: OneContext().key,
                   theme: ThemeProvider.themeOf(themeContext).data,
                   home: HomePage(),
+                  initialRoute: "/",
+                  onGenerateRoute: Routes.generateRoute,
                 ),
               ),
             ),
