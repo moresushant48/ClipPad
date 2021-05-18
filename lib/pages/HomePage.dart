@@ -52,41 +52,61 @@ class _HomePageState extends State<HomePage> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.data != null) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: OneContext().mediaQuery.size.width,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text("Last Copied"),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: StreamBuilder(
-                                stream: FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(snapshot.data.id)
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    User user = User.fromJson(
-                                        jsonEncode(snapshot.data.data()));
-                                    return Linkify(
-                                      text: user.data,
-                                      onOpen: _onOpen,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 18.0),
-                                    );
-                                  } else
-                                    return Container();
-                                },
-                              ),
-                            ),
+                  return Container(
+                    width: OneContext().mediaQuery.size.width,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text("Last Copied"),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(snapshot.data.id)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                if (snapshot.data.data() != null) {
+                                  User user = User.fromJson(
+                                      jsonEncode(snapshot.data.data()));
+                                  return Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Linkify(
+                                        text: user.data,
+                                        onOpen: _onOpen,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 18.0),
+                                      ),
+                                    ),
+                                  );
+                                } else
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.tag_faces_sharp,
+                                        size: 48.0,
+                                      ),
+                                      Opacity(
+                                        opacity: 0.7,
+                                        child: Text(
+                                          "Enjoy Seamless Clipboard sharing, by Starting the Service.",
+                                          style: TextStyle(fontSize: 20.0),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                              } else
+                                return Container();
+                            },
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 } else
