@@ -17,6 +17,8 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
+  <meta name="google-signin-client_id" content="486952219183-08uhj6s8nuti6m3kik45afk32gnnd217.apps.googleusercontent.com" />
+
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -30,17 +32,35 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  
+  <!-- Initialize Firebase -->
+  <script src="https://www.gstatic.com/firebase/init.js"></script>
+  
   <!-- The core Firebase JS SDK is always required and must be listed first -->
-  <script src="/__/firebase/8.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
 
   <!-- TODO: Add SDKs for Firebase products that you want to use
       https://firebase.google.com/docs/web/setup#available-libraries -->
-  <script src="/__/firebase/8.6.1/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    var firebaseConfig = {
+      apiKey: "AIzaSyDW271qRffD10OdrCkwtNzAp_PIBuksF38",
+      authDomain: "clippad.firebaseapp.com",
+      databaseURL: "https://clippad-default-rtdb.firebaseio.com",
+      projectId: "clippad",
+      storageBucket: "clippad.appspot.com",
+      messagingSenderId: "486952219183",
+      appId: "1:486952219183:web:9814ce9921238353584cda",
+      measurementId: "G-BCGC9G29C1"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 
-  <!-- Initialize Firebase -->
-  <script src="/__/firebase/init.js"></script>
-  
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->

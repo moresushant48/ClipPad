@@ -1,6 +1,7 @@
 import 'package:clippad/Routes.dart';
 import 'package:clippad/pages/HomePage.dart';
 import 'package:clippad/services/GoogleAuth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:one_context/one_context.dart';
 import 'package:theme_provider/theme_provider.dart';
@@ -19,9 +20,11 @@ class _InitState extends State<Init> {
   @override
   void initState() {
     super.initState();
-    googleAuthService
-        .isLoggedIn()
-        .then((value) => value ? null : googleAuthService.handleSignIn());
+    kIsWeb
+        ? null
+        : googleAuthService
+            .isLoggedIn()
+            .then((value) => value ? null : googleAuthService.handleSignIn());
   }
 
   @override

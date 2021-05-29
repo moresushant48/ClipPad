@@ -6,7 +6,9 @@ import 'package:clippad/services/ClipboardService.dart';
 import 'package:clippad/services/GoogleAuth.dart';
 import 'package:clippad/services/SharedPrefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:one_context/one_context.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -45,8 +47,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: mainAppBar(context, "Clippad", setState),
-      body: Container(
-        width: OneContext.instance.mediaQuery.size.width,
+      body: SingleChildScrollView(
         child: FutureBuilder(
             future: googleAuthService.getLoggedUser(),
             builder: (context, snapshot) {
@@ -55,10 +56,22 @@ class _HomePageState extends State<HomePage> {
                   return Container(
                     width: OneContext().mediaQuery.size.width,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("Last Copied"),
+                        SizedBox(
+                          height: 12.0,
+                        ),
+                        Text(
+                          "Last Copied",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        SizedBox(
+                          height: 12.0,
+                        ),
+                        Text(
+                          "Tap on text to copy.",
+                          style: TextStyle(color: Colors.grey),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: StreamBuilder(
@@ -71,14 +84,30 @@ class _HomePageState extends State<HomePage> {
                                 if (snapshot.data.data() != null) {
                                   User user = User.fromJson(
                                       jsonEncode(snapshot.data.data()));
-                                  return Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Linkify(
-                                        text: user.data,
-                                        onOpen: _onOpen,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 18.0),
+                                  Clipboard.setData(
+                                      ClipboardData(text: user.data));
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Clipboard.setData(
+                                          ClipboardData(text: user.data));
+
+                                      OneContext.instance.showSnackBar(
+                                        builder: (_) {
+                                          return SnackBar(
+                                              content: Text(
+                                                  "Text Copied to Clipboard"));
+                                        },
+                                      );
+                                    },
+                                    child: Card(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Linkify(
+                                          text: user.data,
+                                          onOpen: _onOpen,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 18.0),
+                                        ),
                                       ),
                                     ),
                                   );
@@ -110,17 +139,20 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 } else
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("App dosen't work without Signing In."),
-                      TextButton(
-                          onPressed: () =>
-                              googleAuthService.handleSignIn().then((value) {
-                                setState(() {});
-                              }),
-                          child: Text("Sign In"))
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("App dosen't work without Signing In."),
+                        TextButton(
+                            onPressed: () =>
+                                googleAuthService.handleSignIn().then((value) {
+                                  setState(() {});
+                                }),
+                            child: Text("Sign In"))
+                      ],
+                    ),
                   );
               } else
                 return Center(
@@ -128,11 +160,13 @@ class _HomePageState extends State<HomePage> {
                 );
             }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => serviceHandler(),
-        child: Icon(fabIcon),
-        mini: true,
-      ),
+      floatingActionButton: kIsWeb
+          ? null
+          : FloatingActionButton(
+              onPressed: () => serviceHandler(),
+              child: Icon(fabIcon),
+              mini: true,
+            ),
     );
   }
 
